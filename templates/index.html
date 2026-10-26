@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PageMate • 10th Standard AI Textbook Companion & RAG Explorer</title>
+  <meta name="description" content="AI-powered 10th Standard Textbook Assistant. Page-accurate RAG search, interactive Gemini AI tutor, syllabus explorer, and textbook source viewer." />
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      --primary-subtle: rgba(99, 102, 241, 0.12);
+
+      --secondary: #06b6d4;
+      --accent: #8b5cf6;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --glass-blur: blur(16px);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 35px var(--primary-glow);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 10%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 85%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      background: rgba(11, 15, 25, 0.85);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-logo svg {
+      width: 22px;
+      height: 22px;
+      fill: #fff;
+    }
+
+    .brand-text h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.15rem 0.5rem;
+      background: var(--primary-subtle);
+      border: 1px solid var(--border-accent);
+      color: #a5b4fc;
+      border-radius: 999px;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Nav Tabs */
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.3rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .nav-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .nav-tab-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.2;
+    }
+
+    /* Navbar Right Actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .lang-toggle {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.2rem;
+    }
+
+    .lang-opt {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.35rem 0.75rem;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-opt.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(6, 182, 212, 0.08));
+      border: 1px solid var(--border-accent);
+      border-radius: 20px;
+      padding: 2.2rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, #a5b4fc, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      max-width: 780px;
+      line-height: 1.6;
+    }
+
+    /* Search Controls */
+    .search-card {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 1.8rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-card:focus-within {
+      border-color: rgba(99, 102, 241, 0.45);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+    }
+
+    .search-form {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.1rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.95rem 1.1rem 0.95rem 3rem;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-btn {
+      padding: 0.95rem 1.8rem;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+
+    .search-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Suggestion Pills */
+    .quick-queries {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+    }
+
+    .query-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-family: var(--font-sans);
+      transition: all 0.2s ease;
+    }
+
+    .query-pill:hover {
+      background: var(--primary-subtle);
+      border-color: var(--border-accent);
+      color: #a5b4fc;
+      transform: translateY(-1px);
+    }
+
+    /* Loading Indicator */
+    .loader-wrap {
+      display: none;
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+
+    .loader-wrap.active {
+      display: block;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1.2rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loader-text {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Result Card */
+    .result-card {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .result-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badges-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.25rem 0.7rem;
+      border-radius: 7px;
+      text-transform: capitalize;
+    }
+
+    .badge-subject {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .badge-chapter {
+      background: rgba(6, 182, 212, 0.15);
+      color: #67e8f9;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .badge-page {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    .badge-fallback {
+      background: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+
+    .badge-llm {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .action-link {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.35rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .action-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Explanation Container */
+    .explanation-box {
+      background: rgba(15, 23, 42, 0.65);
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+
+    /* Accordion / Details */
+    details.source-accordion {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.4);
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    summary.source-summary {
+      padding: 0.85rem 1.2rem;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.2s ease;
+    }
+
+    summary.source-summary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .source-content-box {
+      padding: 1.2rem;
+      background: #090d16;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      line-height: 1.65;
+      color: #cbd5e1;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Ambiguous Subject Choice Modal / Card */
+    .choice-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(17, 24, 39, 0.9));
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 18px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .choice-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fcd34d;
+      margin-bottom: 0.5rem;
+    }
+
+    .choice-buttons-grid {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .choice-btn {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fef3c7;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .choice-btn:hover {
+      background: #f59e0b;
+      color: #000;
+      transform: translateY(-2px);
+    }
+
+    /* Tab: Syllabus Overview */
+    .syllabus-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .subject-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+    }
+
+    .subject-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .subject-header {
+      padding: 1.4rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .subject-info h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-transform: capitalize;
+    }
+
+    .subject-info p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .subject-stats-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: var(--primary-subtle);
+      border: 1px solid var(--border-accent);
+      color: #a5b4fc;
+    }
+
+    .chapter-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+
+    .chapter-item {
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      transition: background 0.2s ease;
+      margin-bottom: 0.25rem;
+    }
+
+    .chapter-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .chapter-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+
+    .chapter-pages {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+    }
+
+    .chapter-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 0.3rem;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .chapter-action-btn:hover {
+      background: var(--primary-subtle);
+      color: #a5b4fc;
+    }
+
+    /* Tab: Gemini AI Tutor */
+    .chat-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+      height: 720px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .chat-sidebar {
+      background: rgba(15, 23, 42, 0.6);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .chat-sidebar h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .tutor-subject-select {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .tutor-subject-select:focus {
+      border-color: var(--primary);
+    }
+
+    .preset-prompts {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 10px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+    }
+
+    .preset-chip:hover {
+      background: var(--primary-subtle);
+      border-color: var(--border-accent);
+      color: #a5b4fc;
+    }
+
+    .chat-main {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+    }
+
+    .chat-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tutor-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .chat-bubble {
+      max-width: 82%;
+      padding: 1rem 1.35rem;
+      border-radius: 16px;
+      font-size: 0.94rem;
+      line-height: 1.65;
+      position: relative;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    .chat-bubble.tutor {
+      align-self: flex-start;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border);
+      color: #f1f5f9;
+      border-bottom-left-radius: 4px;
+      white-space: pre-wrap;
+    }
+
+    .chat-bubble.student {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    }
+
+    .chat-input-bar {
+      padding: 1.1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.8);
+      display: flex;
+      gap: 0.85rem;
+      align-items: center;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 0.85rem 1.1rem;
+      background: rgba(11, 15, 25, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .chat-send-btn {
+      padding: 0.85rem 1.4rem;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .chat-send-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Tab: Textbook Source Viewer */
+    .viewer-layout {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .viewer-toolbar {
+      padding: 1.1rem 1.5rem;
+      background: rgba(15, 23, 42, 0.7);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .viewer-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .viewer-select {
+      padding: 0.6rem 0.9rem;
+      background: rgba(11, 15, 25, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .viewer-page-input {
+      width: 70px;
+      padding: 0.6rem 0.5rem;
+      background: rgba(11, 15, 25, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-main);
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .viewer-nav-btn {
+      padding: 0.6rem 0.95rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .viewer-nav-btn:hover:not(:disabled) {
+      background: var(--primary-subtle);
+      border-color: var(--border-accent);
+      color: #a5b4fc;
+    }
+
+    .viewer-nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .viewer-body {
+      padding: 2rem;
+      min-height: 480px;
+      background: #080c14;
+    }
+
+    .viewer-paper {
+      max-width: 860px;
+      margin: 0 auto;
+      background: rgba(17, 24, 39, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2.2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .viewer-header-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .viewer-text {
+      font-family: var(--font-mono);
+      font-size: 0.92rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      background: rgba(11, 15, 25, 0.8);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .navbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .nav-tabs {
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+      .chat-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .chat-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        max-height: 200px;
+      }
+      .chat-messages {
+        height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="brand-wrap">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>PageMate <span class="brand-badge">TN 10th AI</span></h1>
+        <div class="brand-subtitle">Strict Page-Aware AI Textbook Companion</div>
+      </div>
+    </div>
+
+    <!-- Interactive Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="nav-tab-btn active" data-tab="tab-search" id="btn-tab-search" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>Smart Search &amp; RAG</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tab-syllabus" id="btn-tab-syllabus" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <span>Syllabus Explorer</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tab-tutor" id="btn-tab-tutor" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>Gemini AI Tutor</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tab-viewer" id="btn-tab-viewer" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+        <span>Textbook Source</span>
+      </button>
+    </nav>
+
+    <!-- Language & Status -->
+    <div class="nav-actions">
+      <div class="lang-toggle" role="group" aria-label="Output Language">
+        <button class="lang-opt active" data-lang="en" id="langBtnEn">EN</button>
+        <button class="lang-opt" data-lang="ta" id="langBtnTa">தமிழ்</button>
+      </div>
+
+      <div class="status-pill" id="systemHealthBadge" title="System Status">
+        <div class="status-dot"></div>
+        <span>Local RAG Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="container">
+
+    <!-- TAB 1: Smart Search & RAG Explorer -->
+    <section id="tab-search" class="tab-pane active" role="tabpanel">
+      <div class="hero-banner">
+        <h2 class="hero-title">
+          Ask Your 10th Textbook in <span class="gradient-text">English or தமிழ்</span>
+        </h2>
+        <p class="hero-desc">
+          Strict page-level grounding across Science, Mathematics, Social Science, English, and Tamil. 
+          Instant exact page retrieval via SQLite and semantic dense embeddings via FAISS.
+        </p>
+      </div>
+
+      <div class="search-card">
+        <form id="askForm" class="search-form">
+          <div class="search-input-wrap">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              id="queryInput"
+              type="text"
+              class="search-input"
+              placeholder="Search concepts e.g. 'reflex action', 'Newton laws', or exact pages like 'science pg:45', 'pg:100'..."
+              required
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="search-btn" id="askSubmitBtn">
+            <span>Ask PageMate</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </form>
+
+        <div class="quick-queries">
+          <span>Quick queries:</span>
+          <button type="button" class="query-pill" data-q="explain pg:100">explain pg:100</button>
+          <button type="button" class="query-pill" data-q="science pg:45">science pg:45</button>
+          <button type="button" class="query-pill" data-q="reflex action">reflex action</button>
+          <button type="button" class="query-pill" data-q="Ohm's law resistance">Ohm's law</button>
+          <button type="button" class="query-pill" data-q="maths pg:86">maths pg:86</button>
+          <button type="button" class="query-pill" data-q="social pg:21">social pg:21</button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="searchLoader" class="loader-wrap">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loaderStatusText">Searching textbook database and generating grounded explanation...</div>
+      </div>
+
+      <!-- Results Container -->
+      <div id="searchResultsBox"></div>
+    </section>
+
+
+    <!-- TAB 2: Subject Overview & Syllabus Explorer -->
+    <section id="tab-syllabus" class="tab-pane" role="tabpanel">
+      <div class="hero-banner">
+        <h2 class="hero-title">
+          10th Standard <span class="gradient-text">Complete Syllabus</span> &amp; Chapter Index
+        </h2>
+        <p class="hero-desc">
+          Browse through all 5 official subjects, verified unit breakdowns, and printed textbook page allocations in the local vector store.
+        </p>
+      </div>
+
+      <div id="syllabusLoading" class="loader-wrap active">
+        <div class="spinner"></div>
+        <div class="loader-text">Loading syllabus breakdown from local SQLite database...</div>
+      </div>
+
+      <div id="syllabusGrid" class="syllabus-grid"></div>
+    </section>
+
+
+    <!-- TAB 3: Gemini AI Tutor Chat -->
+    <section id="tab-tutor" class="tab-pane" role="tabpanel">
+      <div class="chat-layout">
+        <!-- Sidebar -->
+        <aside class="chat-sidebar">
+          <h4>Subject Focus</h4>
+          <select id="tutorSubjectSelect" class="tutor-subject-select">
+            <option value="">All Subjects (Comprehensive)</option>
+            <option value="science">Science (இயற்பியல், வேதியியல், உயிரியல்)</option>
+            <option value="maths">Mathematics (கணிதம்)</option>
+            <option value="social">Social Science (சமூக அறிவியல்)</option>
+            <option value="english">English</option>
+            <option value="tamil">Tamil (தமிழ்)</option>
+          </select>
+
+          <h4>Suggested Doubts</h4>
+          <div class="preset-prompts">
+            <button class="preset-chip" data-doubt="Can you explain Newton's three laws of motion with simple examples?">
+              Newton's three laws of motion
+            </button>
+            <button class="preset-chip" data-doubt="What is the difference between reflex action and voluntary action?">
+              Reflex vs Voluntary action
+            </button>
+            <button class="preset-chip" data-doubt="Explain the concept of Arithmetic Progression in simple terms.">
+              Arithmetic Progression basics
+            </button>
+            <button class="preset-chip" data-doubt="What were the main causes of World War I from our Social Science book?">
+              Causes of World War I
+            </button>
+            <button class="preset-chip" data-doubt="Give me 5 high-yield exam revision tips for 10th standard Science.">
+              10th Science revision tips
+            </button>
+          </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+          <div class="chat-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="tutor-avatar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              </div>
+              <div>
+                <h3 style="font-size: 1rem; font-weight: 700;">PageMate AI Tutor</h3>
+                <p style="font-size: 0.75rem; color: #34d399;">Powered by Gemini 2.5 Flash • Context Grounded</p>
+              </div>
+            </div>
+            <button id="clearChatBtn" class="action-link" title="Reset conversation">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              <span>Clear</span>
+            </button>
+          </div>
+
+          <div id="chatMessagesBox" class="chat-messages">
+            <div class="chat-bubble tutor">
+Vanakkam! I am your 10th Standard PageMate AI Tutor. 
+Ask me any question, doubt, or problem from your Science, Maths, Social Science, English, or Tamil textbooks. 
+I explain concepts step-by-step so you can ace your board examinations!
+            </div>
+          </div>
+
+          <form id="chatForm" class="chat-input-bar">
+            <input
+              type="text"
+              id="chatInput"
+              class="chat-input"
+              placeholder="Ask the AI Tutor any doubt or lesson question..."
+              required
+              autocomplete="off"
+            />
+            <button type="submit" class="chat-send-btn" id="chatSendBtn">
+              <span>Send</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TAB 4: Textbook Source Viewer -->
+    <section id="tab-viewer" class="tab-pane" role="tabpanel">
+      <div class="viewer-layout">
+        <div class="viewer-toolbar">
+          <div class="viewer-controls">
+            <label for="viewerSubjectSelect" style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted);">SUBJECT</label>
+            <select id="viewerSubjectSelect" class="viewer-select">
+              <option value="science">Science</option>
+              <option value="maths">Maths</option>
+              <option value="social">Social</option>
+              <option value="english">English</option>
+              <option value="tamil">Tamil</option>
+            </select>
+
+            <label for="viewerPageInput" style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted);">PAGE</label>
+            <input type="number" id="viewerPageInput" class="viewer-page-input" value="1" min="1" max="350" />
+            <button id="viewerGoBtn" class="viewer-nav-btn">Jump</button>
+          </div>
+
+          <div class="viewer-controls">
+            <button id="viewerPrevBtn" class="viewer-nav-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="vertical-align: middle;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span>Prev Page</span>
+            </button>
+            <button id="viewerNextBtn" class="viewer-nav-btn">
+              <span>Next Page</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="vertical-align: middle;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="viewer-body">
+          <div class="viewer-paper">
+            <div class="viewer-header-meta">
+              <div>
+                <span class="badge badge-subject" id="viewerMetaSubject">Subject: Science</span>
+                <span class="badge badge-chapter" id="viewerMetaChapter" style="margin-left: 0.5rem;">Unit 1 Laws of Motion</span>
+              </div>
+              <span class="badge badge-page" id="viewerMetaPage">Page 1</span>
+            </div>
+
+            <div id="viewerTextContent" class="viewer-text">Loading page content...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>PageMate 2.0 • 10th Standard AI Textbook Companion • Local-first SQLite &amp; FAISS RAG System</p>
+  </footer>
+
+  <!-- Core Frontend Logic -->
+  <script>
+    // State management
+    const state = {
+      lang: 'en',
+      activeTab: 'tab-search',
+      chatHistory: [],
+      viewer: {
+        subject: 'science',
+        page: 1,
+        hasPrev: false,
+        hasNext: true,
+      }
+    };
+
+    // DOM References
+    const queryInput = document.getElementById('queryInput');
+    const askForm = document.getElementById('askForm');
+    const searchLoader = document.getElementById('searchLoader');
+    const searchResultsBox = document.getElementById('searchResultsBox');
+
+    const syllabusGrid = document.getElementById('syllabusGrid');
+    const syllabusLoading = document.getElementById('syllabusLoading');
+
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatMessagesBox = document.getElementById('chatMessagesBox');
+    const tutorSubjectSelect = document.getElementById('tutorSubjectSelect');
+    const clearChatBtn = document.getElementById('clearChatBtn');
+
+    const viewerSubjectSelect = document.getElementById('viewerSubjectSelect');
+    const viewerPageInput = document.getElementById('viewerPageInput');
+    const viewerGoBtn = document.getElementById('viewerGoBtn');
+    const viewerPrevBtn = document.getElementById('viewerPrevBtn');
+    const viewerNextBtn = document.getElementById('viewerNextBtn');
+    const viewerTextContent = document.getElementById('viewerTextContent');
+    const viewerMetaSubject = document.getElementById('viewerMetaSubject');
+    const viewerMetaChapter = document.getElementById('viewerMetaChapter');
+    const viewerMetaPage = document.getElementById('viewerMetaPage');
+
+    // Language switcher
+    const langBtnEn = document.getElementById('langBtnEn');
+    const langBtnTa = document.getElementById('langBtnTa');
+
+    langBtnEn.addEventListener('click', () => setLanguage('en'));
+    langBtnTa.addEventListener('click', () => setLanguage('ta'));
+
+    function setLanguage(lang) {
+      state.lang = lang;
+      if (lang === 'en') {
+        langBtnEn.classList.add('active');
+        langBtnTa.classList.remove('active');
+      } else {
+        langBtnTa.classList.add('active');
+        langBtnEn.classList.remove('active');
+      }
+    }
+
+    // Navigation Tab Switching
+    document.querySelectorAll('.nav-tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        switchTab(targetTab);
+      });
+    });
+
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      document.querySelectorAll('.nav-tab-btn').forEach((b) => {
+        b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+      });
+      document.querySelectorAll('.tab-pane').forEach((p) => {
+        p.classList.toggle('active', p.id === tabId);
+      });
+
+      // Lazy load tab data
+      if (tabId === 'tab-syllabus' && (!syllabusGrid.children.length || syllabusLoading.classList.contains('active'))) {
+        fetchSyllabus();
+      }
+      if (tabId === 'tab-viewer') {
+        loadViewerPage(state.viewer.subject, state.viewer.page);
+      }
+    }
+
+    // Quick query pills
+    document.querySelectorAll('.query-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const q = pill.getAttribute('data-q');
+        queryInput.value = q;
+        runSearch(q);
+      });
+    });
+
+    // Smart Search Form Submit
+    askForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = queryInput.value.trim();
+      if (q) runSearch(q);
+    });
+
+    // Execute RAG Query
+    async function runSearch(query) {
+      searchLoader.classList.add('active');
+      searchResultsBox.replaceChildren();
+
+      try {
+        const params = new URLSearchParams({ q: query, lang: state.lang });
+        const res = await fetch(`/api/ask?${params.toString()}`);
+        const data = await res.json();
+        searchLoader.classList.remove('active');
+
+        if (data.status === 'choose') {
+          renderAmbiguousChoices(data);
+          return;
+        }
+
+        if (data.status === 'not_found') {
+          const emptyBox = document.createElement('div');
+          emptyBox.className = 'choice-card';
+          emptyBox.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+          emptyBox.style.background = 'rgba(244, 63, 94, 0.08)';
+
+          const title = document.createElement('div');
+          title.className = 'choice-title';
+          title.style.color = '#fda4af';
+          title.textContent = 'No Exact Matches Found';
+          emptyBox.appendChild(title);
+
+          const desc = document.createElement('p');
+          desc.textContent = data.message || 'Check the page number or try a different concept keyword.';
+          emptyBox.appendChild(desc);
+
+          searchResultsBox.appendChild(emptyBox);
+          return;
+        }
+
+        if (data.status === 'ok' && Array.isArray(data.results)) {
+          if (data.results.length === 0) {
+            const noRes = document.createElement('div');
+            noRes.className = 'choice-card';
+            noRes.textContent = 'No matching pages in index.';
+            searchResultsBox.appendChild(noRes);
+            return;
+          }
+
+          data.results.forEach((item) => {
+            searchResultsBox.appendChild(renderSearchResultCard(item));
+          });
+        }
+      } catch (err) {
+        searchLoader.classList.remove('active');
+        const errBox = document.createElement('div');
+        errBox.className = 'choice-card';
+        errBox.textContent = 'Failed to connect to PageMate backend server. Verify that Uvicorn is active.';
+        searchResultsBox.appendChild(errBox);
+      }
+    }
+
+    // Render Ambiguous Page Picker
+    function renderAmbiguousChoices(data) {
+      const card = document.createElement('div');
+      card.className = 'choice-card';
+
+      const title = document.createElement('div');
+      title.className = 'choice-title';
+      title.textContent = `Page ${data.page} exists in multiple subjects!`;
+      card.appendChild(title);
+
+      const msg = document.createElement('p');
+      msg.textContent = 'Please choose which textbook subject you want to view:';
+      card.appendChild(msg);
+
+      const grid = document.createElement('div');
+      grid.className = 'choice-buttons-grid';
+
+      (data.subjects || []).forEach((subj) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice-btn';
+        btn.textContent = subj.toUpperCase();
+        btn.addEventListener('click', () => {
+          const refinedQuery = `${subj} pg:${data.page}`;
+          queryInput.value = refinedQuery;
+          runSearch(refinedQuery);
+        });
+        grid.appendChild(btn);
+      });
+
+      card.appendChild(grid);
+      searchResultsBox.appendChild(card);
+    }
+
+    // Render Search Result Card (Strict XSS safe textContent)
+    function renderSearchResultCard(item) {
+      const card = document.createElement('article');
+      card.className = 'result-card';
+
+      // Meta Header Row
+      const metaRow = document.createElement('div');
+      metaRow.className = 'card-meta-row';
+
+      const badges = document.createElement('div');
+      badges.className = 'badges-group';
+
+      const subjBadge = document.createElement('span');
+      subjBadge.className = 'badge badge-subject';
+      subjBadge.textContent = item.subject;
+      badges.appendChild(subjBadge);
+
+      const chapBadge = document.createElement('span');
+      chapBadge.className = 'badge badge-chapter';
+      chapBadge.textContent = item.chapter;
+      badges.appendChild(chapBadge);
+
+      const pageBadge = document.createElement('span');
+      pageBadge.className = 'badge badge-page';
+      pageBadge.textContent = `Page ${item.page}`;
+      badges.appendChild(pageBadge);
+
+      const modeBadge = document.createElement('span');
+      modeBadge.className = item.used_fallback ? 'badge badge-fallback' : 'badge badge-llm';
+      modeBadge.textContent = item.used_fallback ? 'Offline Summary' : 'Gemini 2.5 Flash';
+      badges.appendChild(modeBadge);
+
+      metaRow.appendChild(badges);
+
+      // Open in Source Viewer Action
+      const viewBtn = document.createElement('button');
+      viewBtn.className = 'action-link';
+      viewBtn.innerHTML = `<span>View Full Page</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+      viewBtn.addEventListener('click', () => {
+        state.viewer.subject = item.subject;
+        state.viewer.page = item.page;
+        viewerSubjectSelect.value = item.subject;
+        viewerPageInput.value = item.page;
+        switchTab('tab-viewer');
+      });
+      metaRow.appendChild(viewBtn);
+
+      card.appendChild(metaRow);
+
+      // Explanation Box
+      const expBox = document.createElement('div');
+      expBox.className = 'explanation-box';
+      expBox.textContent = item.explanation;
+      card.appendChild(expBox);
+
+      // Source Text Accordion
+      const accordion = document.createElement('details');
+      accordion.className = 'source-accordion';
+      accordion.open = true;
+
+      const summary = document.createElement('summary');
+      summary.className = 'source-summary';
+      summary.innerHTML = `<span>Verified Source Text (${item.subject.toUpperCase()} • Page ${item.page})</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+      accordion.appendChild(summary);
+
+      const sourceContent = document.createElement('div');
+      sourceContent.className = 'source-content-box';
+      sourceContent.textContent = item.source_text;
+      accordion.appendChild(sourceContent);
+
+      card.appendChild(accordion);
+      return card;
+    }
+
+    // Syllabus Tab: Fetch and Display
+    async function fetchSyllabus() {
+      syllabusLoading.classList.add('active');
+      syllabusGrid.replaceChildren();
+
+      try {
+        const res = await fetch('/api/syllabus');
+        const data = await res.json();
+        syllabusLoading.classList.remove('active');
+
+        (data.subjects || []).forEach((subj) => {
+          const card = document.createElement('div');
+          card.className = 'subject-card';
+
+          const head = document.createElement('div');
+          head.className = 'subject-header';
+
+          const info = document.createElement('div');
+          info.className = 'subject-info';
+          const title = document.createElement('h3');
+          title.textContent = subj.display_name;
+          const sub = document.createElement('p');
+          sub.textContent = `${subj.chapter_count} Units • ${subj.total_pages} Pages (Pg ${subj.page_range})`;
+          info.appendChild(title);
+          info.appendChild(sub);
+
+          const tag = document.createElement('div');
+          tag.className = 'subject-stats-tag';
+          tag.textContent = `${subj.chapter_count} Units`;
+
+          head.appendChild(info);
+          head.appendChild(tag);
+          card.appendChild(head);
+
+          const list = document.createElement('div');
+          list.className = 'chapter-list';
+
+          (subj.chapters || []).forEach((ch) => {
+            const item = document.createElement('div');
+            item.className = 'chapter-item';
+
+            const name = document.createElement('div');
+            name.className = 'chapter-name';
+            name.textContent = ch.chapter;
+            item.appendChild(name);
+
+            const rightSide = document.createElement('div');
+            rightSide.style.display = 'flex';
+            rightSide.style.alignItems = 'center';
+            rightSide.style.gap = '0.5rem';
+
+            const pages = document.createElement('span');
+            pages.className = 'chapter-pages';
+            pages.textContent = `p. ${ch.start_page}–${ch.end_page}`;
+            rightSide.appendChild(pages);
+
+            const openBtn = document.createElement('button');
+            openBtn.className = 'chapter-action-btn';
+            openBtn.title = `Read Chapter from Page ${ch.start_page}`;
+            openBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+            openBtn.addEventListener('click', () => {
+              state.viewer.subject = subj.subject;
+              state.viewer.page = ch.start_page;
+              viewerSubjectSelect.value = subj.subject;
+              viewerPageInput.value = ch.start_page;
+              switchTab('tab-viewer');
+            });
+            rightSide.appendChild(openBtn);
+
+            item.appendChild(rightSide);
+            list.appendChild(item);
+          });
+
+          card.appendChild(list);
+          syllabusGrid.appendChild(card);
+        });
+      } catch (err) {
+        syllabusLoading.classList.remove('active');
+        syllabusGrid.textContent = 'Error loading syllabus. Please verify backend connection.';
+      }
+    }
+
+    // Gemini AI Tutor Tab
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+
+      appendChatMessage('student', msg);
+      chatInput.value = '';
+
+      state.chatHistory.push({ role: 'student', text: msg });
+
+      // Create waiting bubble
+      const pendingBubble = appendChatMessage('tutor', 'Thinking and formulating lesson guidance...');
+
+      try {
+        const payload = {
+          message: msg,
+          history: state.chatHistory.slice(-6),
+          lang: state.lang,
+          subject: tutorSubjectSelect.value || null,
+        };
+
+        const res = await fetch('/api/tutor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        pendingBubble.textContent = data.reply;
+        state.chatHistory.push({ role: 'tutor', text: data.reply });
+      } catch (err) {
+        pendingBubble.textContent = 'Unable to reach the AI Tutor service. Please ensure Uvicorn is running.';
+      }
+    });
+
+    function appendChatMessage(role, text) {
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${role}`;
+      bubble.textContent = text;
+      chatMessagesBox.appendChild(bubble);
+      chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+      return bubble;
+    }
+
+    clearChatBtn.addEventListener('click', () => {
+      state.chatHistory = [];
+      chatMessagesBox.replaceChildren();
+      const welcome = document.createElement('div');
+      welcome.className = 'chat-bubble tutor';
+      welcome.textContent = 'Chat cleared. Ask me any doubt or lesson topic from your 10th standard textbook!';
+      chatMessagesBox.appendChild(welcome);
+    });
+
+    document.querySelectorAll('.preset-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const doubt = chip.getAttribute('data-doubt');
+        chatInput.value = doubt;
+        chatForm.dispatchEvent(new Event('submit'));
+      });
+    });
+
+    // Textbook Source Viewer Tab
+    async function loadViewerPage(subject, page) {
+      viewerTextContent.textContent = `Loading Page ${page} (${subject.toUpperCase()})...`;
+
+      try {
+        const res = await fetch(`/api/page?subject=${encodeURIComponent(subject)}&page=${page}`);
+        if (!res.ok) {
+          const errData = await res.json();
+          viewerTextContent.textContent = errData.error || 'Page not found in this subject.';
+          return;
+        }
+
+        const data = await res.json();
+        const p = data.page;
+
+        viewerMetaSubject.textContent = `Subject: ${p.subject.toUpperCase()}`;
+        viewerMetaChapter.textContent = p.chapter;
+        viewerMetaPage.textContent = `Page ${p.page}`;
+        viewerTextContent.textContent = p.text;
+
+        state.viewer.hasPrev = data.has_prev;
+        state.viewer.hasNext = data.has_next;
+        viewerPrevBtn.disabled = !data.has_prev;
+        viewerNextBtn.disabled = !data.has_next;
+      } catch (err) {
+        viewerTextContent.textContent = 'Failed to load textbook page. Verify backend is running.';
+      }
+    }
+
+    viewerGoBtn.addEventListener('click', () => {
+      const subj = viewerSubjectSelect.value;
+      const pg = parseInt(viewerPageInput.value, 10) || 1;
+      state.viewer.subject = subj;
+      state.viewer.page = pg;
+      loadViewerPage(subj, pg);
+    });
+
+    viewerSubjectSelect.addEventListener('change', () => {
+      state.viewer.subject = viewerSubjectSelect.value;
+      loadViewerPage(state.viewer.subject, state.viewer.page);
+    });
+
+    viewerPrevBtn.addEventListener('click', () => {
+      if (state.viewer.hasPrev && state.viewer.page > 1) {
+        state.viewer.page -= 1;
+        viewerPageInput.value = state.viewer.page;
+        loadViewerPage(state.viewer.subject, state.viewer.page);
+      }
+    });
+
+    viewerNextBtn.addEventListener('click', () => {
+      if (state.viewer.hasNext) {
+        state.viewer.page += 1;
+        viewerPageInput.value = state.viewer.page;
+        loadViewerPage(state.viewer.subject, state.viewer.page);
+      }
+    });
+
+    // Initial check on load
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/health');
+        const h = await res.json();
+        const healthPill = document.getElementById('systemHealthBadge');
+        if (h.database_exists && h.faiss_index_exists) {
+          healthPill.innerHTML = `<div class="status-dot"></div><span>Local RAG Ready</span>`;
+        }
+      } catch (e) {
+        // Silent catch for initial load
+      }
+    });
+  </script>
+</body>
+</html>
